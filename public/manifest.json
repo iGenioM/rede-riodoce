@@ -1,0 +1,25 @@
+{
+  "name": "CEASA Digital — Marketplace de Produtores",
+  "short_name": "CEASA Digital",
+  "description": "Conecte-se direto com produtores rurais: compre fresco, venda fácil.",
+  "start_url": "/home",
+  "id": "/home",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f7f6f2",
+  "theme_color": "#0d2118",
+  "scope": "/",
+  "lang": "pt-BR",
+  "categories": ["food", "shopping", "business"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Buscar produtos", "url": "/busca", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Meu carrinho", "url": "/carrinho", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Painel do produtor", "url": "/painel", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
