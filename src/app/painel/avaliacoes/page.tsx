@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Star } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,7 +12,7 @@ import { useToastStore } from "@/lib/store/useToastStore";
 import { timeAgo } from "@/lib/utils";
 
 export default function AvaliacoesPainelPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producerId = useSessionStore((s) => s.producerId);
   const reviews = useReviewsStore((s) => s.reviews);
   const addReply = useReviewsStore((s) => s.addReply);
@@ -32,7 +32,7 @@ export default function AvaliacoesPainelPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Avaliações" onBack={() => router.push("/painel")} />
+      <PageHeader title="Avaliações" onBack={() => push("/painel")} />
 
       <div className="flex flex-col gap-4 px-4 pt-4">
         {summary.count > 0 && (

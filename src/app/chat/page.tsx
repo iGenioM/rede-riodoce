@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { MessageCircle } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,7 +12,7 @@ import { useSessionStore } from "@/lib/store/useSessionStore";
 import { timeAgo } from "@/lib/utils";
 
 export default function ChatListPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const mode = useSessionStore((s) => s.mode);
   const producerId = useSessionStore((s) => s.producerId);
   const conversations = useChatStore((s) => s.conversations);
@@ -25,7 +25,7 @@ export default function ChatListPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Mensagens" onBack={() => router.push(mode === "produtor" ? "/painel" : "/perfil")} />
+      <PageHeader title="Mensagens" onBack={() => push(mode === "produtor" ? "/painel" : "/perfil")} />
 
       <div className="flex flex-col gap-1 px-2 pt-3">
         {list.length === 0 ? (
@@ -38,7 +38,7 @@ export default function ChatListPage() {
             return (
               <button
                 key={conv.id}
-                onClick={() => router.push(`/chat/${conv.id}`)}
+                onClick={() => push(`/chat/${conv.id}`)}
                 className="flex items-center gap-3 rounded-2xl px-3 py-3 text-left active:bg-cream-200"
               >
                 {producer ? (

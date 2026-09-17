@@ -37,6 +37,8 @@ interface SessionState {
   setMode: (mode: ProfileMode) => void;
   toggleMode: () => void;
   setBuyerAddress: (address: BuyerAddress) => void;
+  /** No protótipo, alinha o painel ao produtor que recebeu a proposta. */
+  setProducerId: (producerId: string) => void;
 }
 
 export const useSessionStore = create<SessionState>()(
@@ -62,6 +64,7 @@ export const useSessionStore = create<SessionState>()(
       toggleMode: () =>
         set({ mode: get().mode === "comprador" ? "produtor" : "comprador" }),
       setBuyerAddress: (address) => set({ buyerAddress: address }),
+      setProducerId: (producerId) => set({ producerId }),
     }),
     {
       name: "ceasa-session",

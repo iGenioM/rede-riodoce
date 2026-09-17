@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { Plus, TrendingUp, Package, Star, Clock, ChevronRight } from "lucide-react";
+import { useNavigate } from "@/hooks/useNavigate";
+import { Plus, TrendingUp, Package, Star, Clock, ChevronRight, HandCoins } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ProducerHomeHeader } from "@/components/layout/ProducerHomeHeader";
 import { SectionHeader, Badge, Avatar } from "@/components/ui";
@@ -12,9 +12,11 @@ import { useProductsStore } from "@/lib/store/useProductsStore";
 import { useProducersStore } from "@/lib/store/useProducersStore";
 import { STATUS_META } from "@/lib/orderStatus";
 import { formatBRL, formatDateShort } from "@/lib/utils";
+import { unitLabel } from "@/lib/units";
+import { useProposalsStore } from "@/lib/store/useProposalsStore";
 
 export default function PainelPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producerId = useSessionStore((s) => s.producerId);
   const allOrders = useOrdersStore((s) => s.orders);
   const allProducts = useProductsStore((s) => s.products);
@@ -48,6 +50,15 @@ export default function PainelPage() {
     [products]
   );
 
+  const allProposals = useProposalsStore((s) => s.proposals);
+  const pendingProposals = useMemo(
+    () =>
+      allProposals.filter(
+        (p) => p.producerId === producerId && p.status === "pendente"
+      ),
+    [allProposals, producerId]
+  );
+
   if (!producer) return null;
 
   return (
@@ -75,14 +86,14 @@ export default function PainelPage() {
 
         <section className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => router.push("/painel/produtos/novo")}
+            onClick={() => push("/painel/produtos/novo")}
             className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-lime-500 py-5 text-forest-900 active:scale-[0.98] transition-transform"
           >
             <Plus size={20} />
             <span className="text-xs font-bold">Novo produto</span>
           </button>
           <button
-            onClick={() => router.push("/painel/pedidos")}
+            onClick={() => push("/painel/pedidos")}
             className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-white py-5 text-ink-900 shadow-sm active:scale-[0.98] transition-transform"
           >
             <Package size={20} />
@@ -90,8 +101,34 @@ export default function PainelPage() {
           </button>
         </section>
 
+        {pendingProposals.length > 0 && (
+          <section className="rounded-2xl bg-gold/15 p-4 ring-1 ring-gold/25">
+            <div className="flex items-start justify-between gap-2">
+              <div>
+                <p className="flex items-center gap-1.5 text-sm font-bold text-ink-900">
+                  <HandCoins size={16} className="text-gold" />
+                  Propostas de preço
+                </p>
+                <p className="mt-1 text-xs text-ink-600">
+                  {pendingProposals.length}{" "}
+                  {pendingProposals.length === 1 ? "comprador aguardando" : "compradores aguardando"} sua resposta
+                </p>
+              </div>
+              <Badge variant="gold">{pendingProposals.length} nova(s)</Badge>
+            </div>
+            <button
+              type="button"
+              onClick={() => push("/painel/propostas")}
+              className="mt-3 flex w-full items-center justify-between rounded-xl bg-white px-4 py-3 text-left text-sm font-bold text-forest-900 shadow-sm active:scale-[0.99]"
+            >
+              Ver e responder propostas
+              <ChevronRight size={16} />
+            </button>
+          </section>
+        )}
+
         <section className="flex flex-col gap-3">
-          <SectionHeader title="Pedidos recentes" actionLabel="Ver todos" onAction={() => router.push("/painel/pedidos")} />
+          <SectionHeader title="Pedidos recentes" actionLabel="Ver todos" onAction={() => push("/painel/pedidos")} />
           <div className="flex flex-col gap-2 px-4">
             {recentOrders.length === 0 && (
               <p className="rounded-xl bg-white p-4 text-center text-xs text-ink-500 shadow-sm">
@@ -103,7 +140,7 @@ export default function PainelPage() {
               return (
                 <button
                   key={order.id}
-                  onClick={() => router.push(`/painel/pedidos/${order.id}`)}
+                  onClick={() => push(`/painel/pedidos/${order.id}`)}
                   className="flex items-center gap-3 rounded-2xl bg-white p-3.5 text-left shadow-sm"
                 >
                   <Avatar seed={order.buyerAvatarSeed} size={40} />
@@ -120,13 +157,15 @@ export default function PainelPage() {
         </section>
 
         <section className="flex flex-col gap-3 pb-4">
-          <SectionHeader title="Produtos mais vendidos" actionLabel="Gerenciar" onAction={() => router.push("/painel/produtos")} />
+          <SectionHeader title="Produtos mais vendidos" actionLabel="Gerenciar" onAction={() => push("/painel/produtos")} />
           <div className="flex flex-col gap-2 px-4">
             {topProducts.map((p) => (
               <div key={p.id} className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm">
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold text-ink-900">{p.name}</p>
-                  <p className="text-[11px] text-ink-500">{p.soldTotal} {p.unit} vendidos</p>
+                  <p className="text-[11px] text-ink-500">
+                    {p.soldTotal} {unitLabel(p.unit, p.soldTotal > 1)} vendidos
+                  </p>
                 </div>
                 <span className="text-sm font-bold text-forest-800">{formatBRL(p.pricePerUnit)}</span>
               </div>

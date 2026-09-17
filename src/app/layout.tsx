@@ -36,6 +36,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className="h-full antialiased">
+      <head>
+        <link rel="dns-prefetch" href="https://d8j0ntlcm91z4.cloudfront.net" />
+        <link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossOrigin="" />
+      </head>
       <body className="min-h-full flex flex-col bg-cream-100 text-ink-900">
         <AppProviders>{children}</AppProviders>
       </body>

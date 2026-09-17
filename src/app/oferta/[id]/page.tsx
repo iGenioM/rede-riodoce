@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Minus, Plus, MapPin, ShoppingCart, BadgeCheck, Store } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -14,13 +14,16 @@ import { useCartStore } from "@/lib/store/useCartStore";
 import { useToastStore } from "@/lib/store/useToastStore";
 import { useSessionStore } from "@/lib/store/useSessionStore";
 import { formatBRL, formatDateFull } from "@/lib/utils";
+import { unitLabel, qtyStep } from "@/lib/units";
+import { NegotiationPanel } from "@/components/NegotiationPanel";
+import { useProposalsStore } from "@/lib/store/useProposalsStore";
 import { distanceKm, formatDistance } from "@/lib/geo";
 import { CATEGORIES } from "@/lib/mockData";
 import { getProductTypeSummary } from "@/lib/offers";
 
 export default function ProdutoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const [qty, setQty] = useState(1);
 
   const allProducts = useProductsStore((s) => s.products);
@@ -34,6 +37,8 @@ export default function ProdutoPage({ params }: { params: Promise<{ id: string }
   const addItem = useCartStore((s) => s.addItem);
   const show = useToastStore((s) => s.show);
   const buyerLocation = useSessionStore((s) => s.buyerAddress.location);
+  const buyerName = useSessionStore((s) => s.buyerName);
+  const acceptedPrice = useProposalsStore((s) => s.acceptedPrice(product?.id ?? "", buyerName));
 
   if (!product || !producer) {
     return (
@@ -46,11 +51,16 @@ export default function ProdutoPage({ params }: { params: Promise<{ id: string }
 
   const category = CATEGORIES.find((c) => c.id === product.categoryId);
   const dist = distanceKm(buyerLocation, producer.location);
-  const step = product.unit === "kg" ? 0.5 : 1;
+  const step = qtyStep(product.unit);
+  const unitPrice = acceptedPrice ?? product.pricePerUnit;
 
   function addToCart() {
-    addItem(product!.id, product!.producerId, qty);
-    show(`${qty} ${product!.unit} de ${product!.name} adicionado`, "success");
+    const active = useProposalsStore.getState().activeForProduct(product!.id, buyerName);
+    addItem(product!.id, product!.producerId, qty, {
+      negotiatedPricePerUnit: acceptedPrice,
+      proposalId: active?.status === "aceita" ? active.id : undefined,
+    });
+    show(`${qty} ${unitLabel(product!.unit, qty > 1)} de ${product!.name} adicionado`, "success");
     setQty(1);
   }
 
@@ -58,8 +68,15 @@ export default function ProdutoPage({ params }: { params: Promise<{ id: string }
     <AppShell hideNav>
       <div className="pb-24">
       <div className="relative">
-        <ProductImage seed={product.imageSeed} className="h-64 w-full" rounded="rounded-none" emojiClassName="text-8xl" />
-        <PageHeader title="" tone="overlay" onBack={() => router.back()} />
+        <ProductImage
+          seed={product.imageSeed}
+          className="h-64 w-full"
+          rounded="rounded-none"
+          emojiClassName="text-8xl"
+          priority
+          sizes="(max-width: 448px) 100vw, 448px"
+        />
+        <PageHeader title="" tone="overlay" onBack={() => back()} />
         {product.organic && (
           <span className="absolute right-3 top-[calc(env(safe-area-inset-top)+12px)] z-10 rounded-full bg-white px-3 py-1 text-xs font-bold text-forest-700 shadow">
             🌱 Orgânico
@@ -71,18 +88,23 @@ export default function ProdutoPage({ params }: { params: Promise<{ id: string }
         {category && <Badge variant="outline">{category.name}</Badge>}
         <h1 className="mt-2 text-xl font-extrabold text-ink-900">{product.name}</h1>
         <p className="mt-1 text-2xl font-extrabold text-forest-800">
-          {formatBRL(product.pricePerUnit)}
-          <span className="text-sm font-semibold text-ink-500"> /{product.unit}</span>
+          {formatBRL(unitPrice)}
+          <span className="text-sm font-semibold text-ink-500"> /{unitLabel(product.unit)}</span>
+          {acceptedPrice != null && (
+            <span className="ml-2 text-xs font-bold text-lime-700">preço negociado</span>
+          )}
         </p>
         <p className="mt-3 text-sm leading-relaxed text-ink-700">{product.description}</p>
 
         <div className="mt-3 flex flex-wrap gap-2 text-xs text-ink-500">
           <span>Colhido em {formatDateFull(product.harvestedAt)}</span>
-          <span>· {product.availableQty} {product.unit} disponíveis</span>
+          <span>· {product.availableQty} {unitLabel(product.unit, product.availableQty > 1)} disponíveis</span>
         </div>
 
+        <NegotiationPanel product={product} qty={qty} />
+
         <button
-          onClick={() => router.push(`/produtores/${producer.id}`)}
+          onClick={() => push(`/produtores/${producer.id}`)}
           className="mt-5 flex w-full items-center gap-3 rounded-2xl bg-white p-3.5 text-left shadow-sm active:scale-[0.99] transition-transform"
         >
           <Avatar seed={producer.avatarSeed} size={44} />
@@ -101,7 +123,7 @@ export default function ProdutoPage({ params }: { params: Promise<{ id: string }
 
         {otherOffersCount > 0 && (
           <button
-            onClick={() => router.push(`/produto/${product.productTypeId}`)}
+            onClick={() => push(`/produto/${product.productTypeId}`)}
             className="mt-3 flex w-full items-center gap-3 rounded-2xl bg-lime-500/15 p-3.5 text-left active:scale-[0.99] transition-transform"
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-900 text-lime-400">
@@ -132,16 +154,14 @@ export default function ProdutoPage({ params }: { params: Promise<{ id: string }
       <div className="fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-md items-center gap-3 border-t border-ink-900/8 bg-white px-4 py-3 safe-bottom">
         <div className="flex items-center gap-3 rounded-xl bg-cream-200 px-2 py-1.5">
           <button
-            onClick={() => setQty((q) => Math.max(step, Math.round((q - step) * 100) / 100))}
+            onClick={() => setQty((q) => Math.max(step, q - step))}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-ink-900 shadow-sm"
           >
             <Minus size={15} />
           </button>
-          <span className="w-10 text-center text-sm font-bold text-ink-900">
-            {Number.isInteger(qty) ? qty : qty.toFixed(1)}
-          </span>
+          <span className="w-10 text-center text-sm font-bold text-ink-900">{qty}</span>
           <button
-            onClick={() => setQty((q) => Math.round((q + step) * 100) / 100)}
+            onClick={() => setQty((q) => q + step)}
             className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-ink-900 shadow-sm"
           >
             <Plus size={15} />
@@ -149,7 +169,7 @@ export default function ProdutoPage({ params }: { params: Promise<{ id: string }
         </div>
         <Button className="flex-1" size="lg" onClick={addToCart}>
           <ShoppingCart size={17} />
-          Adicionar · {formatBRL(product.pricePerUnit * qty)}
+          Adicionar · {formatBRL(unitPrice * qty)}
         </Button>
       </div>
       <div className="h-20" />

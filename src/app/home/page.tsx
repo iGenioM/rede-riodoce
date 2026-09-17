@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
+import { prefetchImageUrls } from "@/lib/prefetchImages";
 import { AppShell } from "@/components/layout/AppShell";
 import { BuyerHomeHeader } from "@/components/layout/BuyerHomeHeader";
 import { SectionHeader } from "@/components/ui";
@@ -44,6 +45,18 @@ export default function BuyerHomePage() {
         .slice(0, 4),
     [producers, buyerLocation]
   );
+
+  useEffect(() => {
+    const urls: string[] = [];
+    for (const t of bestSelling) {
+      if (t.imageSeed.photoUrl) urls.push(t.imageSeed.photoUrl);
+    }
+    for (const { producer } of nearby) {
+      if (producer.coverSeed.photoUrl) urls.push(producer.coverSeed.photoUrl);
+      if (producer.avatarSeed.photoUrl) urls.push(producer.avatarSeed.photoUrl);
+    }
+    prefetchImageUrls(urls);
+  }, [bestSelling, nearby]);
 
   return (
     <AppShell>

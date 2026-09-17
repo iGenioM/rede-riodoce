@@ -1,12 +1,13 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import type { Product } from "../types";
+import type { Product, Unit } from "../types";
 import { PRODUCTS } from "../mockData";
 import { uid, slugify } from "../utils";
+import { defaultMinQtyForProposal } from "../units";
 
 interface ProductsState {
   products: Product[];
-  addProduct: (p: Omit<Product, "id" | "soldTotal" | "productTypeId">) => Product;
+  addProduct: (p: Omit<Product, "id" | "soldTotal" | "productTypeId" | "minQtyForProposal">) => Product;
   updateProduct: (id: string, patch: Partial<Product>) => void;
   removeProduct: (id: string) => void;
   toggleActive: (id: string) => void;
@@ -21,7 +22,13 @@ export const useProductsStore = create<ProductsState>()(
         // productTypeId é derivado do nome — assim, se outro produtor já
         // vende algo com o mesmo nome, os dois viram "ofertas" do mesmo
         // produto automaticamente (ver src/lib/offers.ts).
-        const product: Product = { ...p, id: uid("prod"), soldTotal: 0, productTypeId: `type_${slugify(p.name)}` };
+        const product: Product = {
+          ...p,
+          id: uid("prod"),
+          soldTotal: 0,
+          productTypeId: `type_${slugify(p.name)}`,
+          minQtyForProposal: defaultMinQtyForProposal(p.unit),
+        };
         set({ products: [product, ...get().products] });
         return product;
       },
@@ -54,6 +61,17 @@ export const useProductsStore = create<ProductsState>()(
           ),
         }),
     }),
-    { name: "ceasa-products", storage: createJSONStorage(() => localStorage) }
+    {
+      name: "ceasa-products",
+      storage: createJSONStorage(() => localStorage),
+      onRehydrateStorage: () => (state) => {
+        if (!state?.products) return;
+        state.products = state.products.map((p) => ({
+          ...p,
+          minQtyForProposal:
+            p.minQtyForProposal ?? defaultMinQtyForProposal(p.unit as Unit),
+        }));
+      },
+    }
   )
 );

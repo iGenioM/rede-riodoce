@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Minus, Plus, Trash2, ShoppingBag, MapPin } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,10 +12,12 @@ import { useProductsStore } from "@/lib/store/useProductsStore";
 import { useProducersStore } from "@/lib/store/useProducersStore";
 import { useSessionStore } from "@/lib/store/useSessionStore";
 import { formatBRL, formatQty } from "@/lib/utils";
+import { cartLineTotal } from "@/lib/pricing";
+import { qtyStep, unitLabel } from "@/lib/units";
 import { distanceKm } from "@/lib/geo";
 
 export default function CarrinhoPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const items = useCartStore((s) => s.items);
   const updateQty = useCartStore((s) => s.updateQty);
   const removeItem = useCartStore((s) => s.removeItem);
@@ -33,7 +35,7 @@ export default function CarrinhoPage() {
       const producer = producers.find((p) => p.id === producerId);
       const groupSubtotal = groupItems.reduce((sum, it) => {
         const product = products.find((p) => p.id === it.productId);
-        return sum + (product ? product.pricePerUnit * it.qty : 0);
+        return sum + cartLineTotal(product, it);
       }, 0);
       subtotal += groupSubtotal;
       if (producer) {
@@ -47,13 +49,13 @@ export default function CarrinhoPage() {
   if (items.length === 0) {
     return (
       <AppShell>
-        <PageHeader title="Carrinho" onBack={() => router.push("/home")} />
+        <PageHeader title="Carrinho" onBack={() => push("/home")} />
         <EmptyState
           icon={<ShoppingBag size={26} />}
           title="Seu carrinho está vazio"
           description="Explore produtores da sua região e adicione produtos frescos."
           action={
-            <Button onClick={() => router.push("/home")} className="mt-2">
+            <Button onClick={() => push("/home")} className="mt-2">
               Explorar produtos
             </Button>
           }
@@ -65,7 +67,7 @@ export default function CarrinhoPage() {
   return (
     <AppShell hideNav>
       <div className="pb-40">
-        <PageHeader title="Carrinho" onBack={() => router.push("/home")} />
+        <PageHeader title="Carrinho" onBack={() => push("/home")} />
 
         <div className="flex flex-col gap-4 px-4 pt-3">
           {[...groups.entries()].map(([producerId, groupItems]) => {
@@ -75,7 +77,7 @@ export default function CarrinhoPage() {
             const deliveryFee = Math.round((6 + dist * 0.35) * 100) / 100;
             const subtotal = groupItems.reduce((sum, it) => {
               const product = products.find((p) => p.id === it.productId);
-              return sum + (product ? product.pricePerUnit * it.qty : 0);
+              return sum + cartLineTotal(product, it);
             }, 0);
 
             return (
@@ -101,26 +103,30 @@ export default function CarrinhoPage() {
                   {groupItems.map((item) => {
                     const product = products.find((p) => p.id === item.productId);
                     if (!product) return null;
-                    const step = product.unit === "kg" ? 0.5 : 1;
+                    const step = qtyStep(product.unit);
+                    const linePrice = item.negotiatedPricePerUnit ?? product.pricePerUnit;
                     return (
                       <div key={item.productId} className="flex items-center gap-3">
                         <ProductImage seed={product.imageSeed} className="h-14 w-14 shrink-0" emojiClassName="text-2xl" />
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-ink-900">{product.name}</p>
                           <p className="text-xs text-ink-500">
-                            {formatBRL(product.pricePerUnit)}/{product.unit}
+                            {formatBRL(linePrice)}/{unitLabel(product.unit)}
+                            {item.negotiatedPricePerUnit != null && (
+                              <span className="ml-1 font-semibold text-forest-700">negociado</span>
+                            )}
                           </p>
                         </div>
                         <div className="flex items-center gap-2 rounded-lg bg-cream-200 px-1.5 py-1">
                           <button
-                            onClick={() => updateQty(item.productId, Math.round((item.qty - step) * 100) / 100)}
+                            onClick={() => updateQty(item.productId, item.qty - step)}
                             className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-ink-900"
                           >
                             <Minus size={12} />
                           </button>
-                          <span className="w-8 text-center text-xs font-bold">{formatQty(item.qty, "")}</span>
+                          <span className="w-8 text-center text-xs font-bold">{formatQty(item.qty, product.unit)}</span>
                           <button
-                            onClick={() => updateQty(item.productId, Math.round((item.qty + step) * 100) / 100)}
+                            onClick={() => updateQty(item.productId, item.qty + step)}
                             className="flex h-6 w-6 items-center justify-center rounded-md bg-white text-ink-900"
                           >
                             <Plus size={12} />
@@ -157,7 +163,7 @@ export default function CarrinhoPage() {
           <span className="text-ink-500">Frete total</span>
           <span className="font-semibold text-ink-900">{formatBRL(grandTotal.delivery)}</span>
         </div>
-        <Button size="lg" className="w-full" onClick={() => router.push("/checkout")}>
+        <Button size="lg" className="w-full" onClick={() => push("/checkout")}>
           Finalizar pedido · {formatBRL(grandTotal.total)}
         </Button>
       </div>

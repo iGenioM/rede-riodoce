@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { Bell, MessageCircle, Package, Star, Info } from "lucide-react";
+import { useNavigate } from "@/hooks/useNavigate";
+import { Bell, MessageCircle, Package, Star, Info, HandCoins } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { EmptyState } from "@/components/ui";
@@ -11,11 +11,13 @@ import { useSessionStore } from "@/lib/store/useSessionStore";
 import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
-const ICONS = { pedido: Package, chat: MessageCircle, avaliacao: Star, sistema: Info };
+const ICONS = { pedido: Package, chat: MessageCircle, avaliacao: Star, proposta: HandCoins, sistema: Info };
 
 export default function NotificacoesPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const mode = useSessionStore((s) => s.mode);
+  const setMode = useSessionStore((s) => s.setMode);
+  const setProducerId = useSessionStore((s) => s.setProducerId);
   const notifications = useNotificationsStore((s) => s.notifications);
   const markRead = useNotificationsStore((s) => s.markRead);
   const markAllRead = useNotificationsStore((s) => s.markAllRead);
@@ -34,7 +36,7 @@ export default function NotificacoesPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Notificações" onBack={() => router.push(mode === "produtor" ? "/painel" : "/home")} />
+      <PageHeader title="Notificações" onBack={() => push(mode === "produtor" ? "/painel" : "/home")} />
 
       <div className="flex flex-col gap-2.5 px-4 pt-4">
         {list.length === 0 ? (
@@ -47,7 +49,11 @@ export default function NotificacoesPage() {
                 key={n.id}
                 onClick={() => {
                   markRead(n.id);
-                  if (n.link) router.push(n.link);
+                  if (n.type === "proposta") {
+                    setMode("produtor");
+                    if (n.producerId) setProducerId(n.producerId);
+                  }
+                  if (n.link) push(n.link);
                 }}
                 className={cn(
                   "flex items-start gap-3 rounded-2xl p-4 text-left shadow-sm",

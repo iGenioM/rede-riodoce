@@ -1,48 +1,38 @@
 "use client";
 
-import { useState } from "react";
 import type { ImageSeed } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { RemotePhoto } from "./RemotePhoto";
 
 interface ProductImageProps {
   seed: ImageSeed;
   className?: string;
   emojiClassName?: string;
   rounded?: string;
+  priority?: boolean;
+  sizes?: string;
 }
 
 /**
- * Imagem do produto: usa a foto profissional gerada (seed.photoUrl) quando
- * disponível. Se não houver URL, ou a foto falhar ao carregar (ex.: sem
- * conexão), cai de volta pro placeholder 100% CSS (gradiente + emoji) —
- * garantindo que o app continue funcionando offline mesmo com fotos reais.
+ * Imagem do produto: foto remota quando disponível, com skeleton até carregar;
+ * fallback em gradiente + emoji se falhar ou estiver offline.
  */
-export function ProductImage({ seed, className, emojiClassName, rounded = "rounded-2xl" }: ProductImageProps) {
-  const [errored, setErrored] = useState(false);
-  const showPhoto = Boolean(seed.photoUrl) && !errored;
-
+export function ProductImage({
+  seed,
+  className,
+  emojiClassName,
+  rounded = "rounded-2xl",
+  priority = false,
+  sizes,
+}: ProductImageProps) {
   return (
-    <div
-      className={cn("relative flex items-center justify-center overflow-hidden", rounded, className)}
-      style={{
-        backgroundImage: `linear-gradient(135deg, ${seed.from}, ${seed.to})`,
-      }}
-    >
-      {showPhoto ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={seed.photoUrl}
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
-          onError={() => setErrored(true)}
-        />
-      ) : (
-        <>
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.35),transparent_55%)]" />
-          <span className={cn("relative drop-shadow-sm", emojiClassName ?? "text-4xl")}>{seed.emoji}</span>
-        </>
-      )}
-    </div>
+    <RemotePhoto
+      seed={seed}
+      alt=""
+      containerClassName={className}
+      emojiClassName={emojiClassName}
+      rounded={rounded}
+      priority={priority}
+      sizes={sizes}
+    />
   );
 }

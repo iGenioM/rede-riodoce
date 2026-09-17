@@ -41,7 +41,8 @@ export interface Producer {
   certifications: string[];
 }
 
-export type Unit = "kg" | "dz" | "unid" | "molho";
+/** Embalagens de atacado (não varejo por kg/unidade). */
+export type Unit = "cx" | "saco" | "fardo" | "engradado";
 
 export interface Product {
   id: string;
@@ -60,12 +61,37 @@ export interface Product {
   harvestedAt: string; // ISO
   active: boolean;
   soldTotal: number;
+  /** Quantidade mínima (embalagens) para liberar negociação de preço. */
+  minQtyForProposal: number;
 }
 
 export interface CartItem {
   productId: string;
   producerId: string;
   qty: number;
+  /** Preço acordado em proposta aceita (substitui o preço de tabela). */
+  negotiatedPricePerUnit?: number;
+  proposalId?: string;
+}
+
+export type ProposalStatus = "pendente" | "aceita" | "recusada";
+
+export interface PriceProposal {
+  id: string;
+  productId: string;
+  productName: string;
+  producerId: string;
+  buyerBusinessName: string;
+  buyerContactName: string;
+  buyerAvatarSeed: ImageSeed;
+  qty: number;
+  unit: Unit;
+  listPricePerUnit: number;
+  proposedPricePerUnit: number;
+  status: ProposalStatus;
+  createdAt: string;
+  updatedAt: string;
+  note?: string;
 }
 
 export type OrderStatus =
@@ -175,8 +201,11 @@ export interface AppNotification {
   body: string;
   createdAt: string;
   read: boolean;
-  type: "pedido" | "chat" | "avaliacao" | "sistema";
+  type: "pedido" | "chat" | "avaliacao" | "proposta" | "sistema";
   link?: string;
+  /** Produtor que deve ver/responder (propostas). */
+  producerId?: string;
+  proposalId?: string;
 }
 
 export interface BuyerAddress {

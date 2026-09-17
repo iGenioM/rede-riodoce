@@ -1,7 +1,8 @@
 "use client";
 
 import { Suspense, useMemo, useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Search, X, SlidersHorizontal, Leaf } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -22,7 +23,7 @@ type SortKey = "relevancia" | "menor_preco" | "maior_preco" | "mais_vendido" | "
 type ResultTab = "produtos" | "produtores";
 
 function BuscaContent() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("categoria") ?? "";
 
@@ -90,7 +91,7 @@ function BuscaContent() {
 
   return (
     <AppShell>
-      <PageHeader title="Buscar" onBack={() => router.push("/home")} />
+      <PageHeader title="Buscar" onBack={() => push("/home")} />
 
       <div className="px-4 pt-3">
         <div className="flex items-center gap-2">

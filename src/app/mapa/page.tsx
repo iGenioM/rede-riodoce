@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { MapView, type MapMarker } from "@/components/map/MapView";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import { MapPin } from "lucide-react";
 
 export default function MapaPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producers = useProducersStore((s) => s.producers);
   const buyerLocation = useSessionStore((s) => s.buyerAddress.location);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -46,7 +46,7 @@ export default function MapaPage() {
             markers={markers}
             className="h-full w-full"
           />
-          <PageHeader title="" tone="overlay" onBack={() => router.push("/home")} />
+          <PageHeader title="" tone="overlay" onBack={() => push("/home")} />
         </div>
 
         <div className="no-scrollbar flex-1 overflow-y-auto rounded-t-3xl bg-cream-100 px-4 pb-24 pt-4 shadow-[0_-6px_24px_rgba(18,32,26,0.12)]">
@@ -60,7 +60,7 @@ export default function MapaPage() {
                 key={producer.id}
                 onClick={() => {
                   setSelectedId(producer.id);
-                  router.push(`/produtores/${producer.id}`);
+                  push(`/produtores/${producer.id}`);
                 }}
                 className={cn(
                   "flex items-center gap-3 rounded-2xl bg-white p-3 text-left shadow-[0_1px_3px_rgba(18,32,26,0.08)] transition-transform active:scale-[0.99]",

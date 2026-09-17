@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LinkPendingHighlight } from "@/components/ui/LinkPendingHighlight";
 import { MapPin, BadgeCheck } from "lucide-react";
 import type { Producer } from "@/lib/types";
 import { Avatar, RatingStars } from "@/components/ui";
@@ -20,9 +21,11 @@ export function ProducerCard({
     return (
       <Link
         href={`/produtores/${producer.id}`}
-        className="flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(18,32,26,0.08)] active:scale-[0.98] transition-transform"
+        prefetch
+        className="relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_1px_3px_rgba(18,32,26,0.08)] active:scale-[0.98] transition-transform"
       >
-        <ProductImage seed={producer.coverSeed} className="h-20 w-full" rounded="rounded-none" emojiClassName="text-4xl" />
+        <LinkPendingHighlight className="rounded-2xl" />
+        <ProductImage seed={producer.coverSeed} className="h-20 w-full" rounded="rounded-none" emojiClassName="text-4xl" sizes="(max-width:448px) 50vw, 224px" />
         <div className="flex items-center gap-2 p-3">
           <Avatar seed={producer.avatarSeed} size={36} />
           <div className="min-w-0 flex-1">
@@ -40,8 +43,10 @@ export function ProducerCard({
   return (
     <Link
       href={`/produtores/${producer.id}`}
-      className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[0_1px_3px_rgba(18,32,26,0.08)] active:scale-[0.99] transition-transform"
+      prefetch
+      className="relative flex items-center gap-3 rounded-2xl bg-white p-3 shadow-[0_1px_3px_rgba(18,32,26,0.08)] active:scale-[0.99] transition-transform"
     >
+      <LinkPendingHighlight className="rounded-2xl" />
       <Avatar seed={producer.avatarSeed} size={52} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1">

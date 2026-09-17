@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { MapPin } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -12,7 +12,7 @@ import { useProducersStore } from "@/lib/store/useProducersStore";
 import { useToastStore } from "@/lib/store/useToastStore";
 
 export default function AreaAtuacaoPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producerId = useSessionStore((s) => s.producerId);
   const producer = useProducersStore((s) => s.producers.find((p) => p.id === producerId));
   const updateRadius = useProducersStore((s) => s.updateRadius);
@@ -28,7 +28,7 @@ export default function AreaAtuacaoPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Área de atuação" onBack={() => router.push("/painel/perfil")} />
+      <PageHeader title="Área de atuação" onBack={() => push("/painel/perfil")} />
 
       <div className="h-56 w-full">
         <MapView

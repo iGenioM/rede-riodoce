@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LinkPendingHighlight } from "@/components/ui/LinkPendingHighlight";
 import { usePathname } from "next/navigation";
 import {
   Home,
@@ -46,8 +47,10 @@ export function BottomNav() {
           <Link
             key={tab.href}
             href={tab.href}
-            className="flex flex-1 flex-col items-center gap-1 py-2.5"
+            prefetch
+            className="relative flex flex-1 flex-col items-center gap-1 py-2.5"
           >
+            <LinkPendingHighlight className="rounded-xl" />
             <Icon
               size={21}
               strokeWidth={active ? 2.4 : 1.9}

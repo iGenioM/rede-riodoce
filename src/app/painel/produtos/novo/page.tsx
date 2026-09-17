@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProductForm, type ProductFormValues } from "@/components/ProductForm";
@@ -10,7 +10,7 @@ import { useToastStore } from "@/lib/store/useToastStore";
 import { CATEGORIES } from "@/lib/mockData";
 
 export default function NovoProdutoPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producerId = useSessionStore((s) => s.producerId);
   const addProduct = useProductsStore((s) => s.addProduct);
   const showToast = useToastStore((s) => s.show);
@@ -31,12 +31,12 @@ export default function NovoProdutoPage() {
       imageSeed: { emoji: values.emoji, from: category.gradient[0], to: category.gradient[1] },
     });
     showToast("Produto adicionado com sucesso!", "success");
-    router.push("/painel/produtos");
+    push("/painel/produtos");
   }
 
   return (
     <AppShell>
-      <PageHeader title="Novo produto" onBack={() => router.push("/painel/produtos")} />
+      <PageHeader title="Novo produto" onBack={() => push("/painel/produtos")} />
       <div className="px-4 pt-4">
         <ProductForm onSubmit={handleSubmit} submitLabel="Publicar produto" />
       </div>

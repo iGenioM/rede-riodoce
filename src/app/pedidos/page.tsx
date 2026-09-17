@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { ClipboardList, Star } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 type Tab = "andamento" | "concluidos";
 
 export default function PedidosPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const buyerId = useSessionStore((s) => s.buyerId);
   const allOrders = useOrdersStore((s) => s.orders);
   const producers = useProducersStore((s) => s.producers);
@@ -34,7 +34,7 @@ export default function PedidosPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Meus pedidos" onBack={() => router.push("/home")} />
+      <PageHeader title="Meus pedidos" onBack={() => push("/home")} />
 
       <div className="px-4 pt-3">
         <div className="flex items-center gap-1 rounded-full bg-cream-200 p-1">
@@ -66,7 +66,7 @@ export default function PedidosPage() {
             return (
               <button
                 key={order.id}
-                onClick={() => router.push(`/pedidos/${order.id}`)}
+                onClick={() => push(`/pedidos/${order.id}`)}
                 className="flex flex-col gap-2.5 rounded-2xl bg-white p-4 text-left shadow-sm"
               >
                 <div className="flex items-center gap-2.5">
@@ -96,7 +96,7 @@ export default function PedidosPage() {
 
       {tab === "andamento" && filtered.length === 0 && (
         <div className="mt-2 px-4">
-          <Button variant="outline" className="w-full" onClick={() => router.push("/home")}>
+          <Button variant="outline" className="w-full" onClick={() => push("/home")}>
             Explorar produtos
           </Button>
         </div>

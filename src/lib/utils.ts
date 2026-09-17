@@ -11,7 +11,13 @@ export function formatBRL(value: number): string {
   return BRL.format(value);
 }
 
-export function formatQty(qty: number, unit: string): string {
+import type { Unit } from "./types";
+import { formatQtyWholesale } from "./units";
+
+export function formatQty(qty: number, unit: Unit | string): string {
+  if (unit === "cx" || unit === "saco" || unit === "fardo" || unit === "engradado") {
+    return formatQtyWholesale(qty, unit);
+  }
   const n = Number.isInteger(qty) ? qty.toString() : qty.toFixed(qty < 10 ? 2 : 1);
   return `${n} ${unit}`;
 }

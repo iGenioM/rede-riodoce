@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { ClipboardList } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -22,7 +22,7 @@ const TAB_STATUSES: Record<Tab, OrderStatus[]> = {
 };
 
 export default function PedidosPainelPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producerId = useSessionStore((s) => s.producerId);
   const allOrders = useOrdersStore((s) => s.orders);
   const [tab, setTab] = useState<Tab>("novos");
@@ -40,7 +40,7 @@ export default function PedidosPainelPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Pedidos recebidos" onBack={() => router.push("/painel")} />
+      <PageHeader title="Pedidos recebidos" onBack={() => push("/painel")} />
 
       <div className="px-4 pt-3">
         <div className="flex items-center gap-1 rounded-full bg-cream-200 p-1">
@@ -79,7 +79,7 @@ export default function PedidosPainelPage() {
             return (
               <button
                 key={order.id}
-                onClick={() => router.push(`/painel/pedidos/${order.id}`)}
+                onClick={() => push(`/painel/pedidos/${order.id}`)}
                 className="flex flex-col gap-2 rounded-2xl bg-white p-4 text-left shadow-sm"
               >
                 <div className="flex items-center gap-2.5">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Banknote, CreditCard, QrCode, MapPin, ChevronRight } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -15,13 +15,15 @@ import { useNotificationsStore } from "@/lib/store/useNotificationsStore";
 import { useToastStore } from "@/lib/store/useToastStore";
 import { distanceKm } from "@/lib/geo";
 import { formatBRL, uid } from "@/lib/utils";
+import { unitLabel } from "@/lib/units";
+import { cartLineTotal } from "@/lib/pricing";
 import type { Order } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type PaymentMethod = "pix" | "cartao" | "dinheiro";
 
 export default function CheckoutPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const items = useCartStore((s) => s.items);
   const clearCart = useCartStore((s) => s.clear);
   const products = useProductsStore((s) => s.products);
@@ -50,7 +52,7 @@ export default function CheckoutPage() {
       const producer = producers.find((p) => p.id === producerId);
       subtotal += groupItems.reduce((sum, it) => {
         const product = products.find((p) => p.id === it.productId);
-        return sum + (product ? product.pricePerUnit * it.qty : 0);
+        return sum + cartLineTotal(product, it);
       }, 0);
       if (producer) {
         const dist = distanceKm(buyerAddress.location, producer.location);
@@ -81,12 +83,13 @@ export default function CheckoutPage() {
       const deliveryFee = Math.round((6 + dist * 0.35) * 100) / 100;
       const orderItems = groupItems.map((it) => {
         const product = products.find((p) => p.id === it.productId)!;
+        const pricePerUnit = it.negotiatedPricePerUnit ?? product.pricePerUnit;
         return {
           productId: product.id,
           name: product.name,
           qty: it.qty,
           unit: product.unit,
-          pricePerUnit: product.pricePerUnit,
+          pricePerUnit,
           imageSeed: product.imageSeed,
         };
       });
@@ -133,17 +136,17 @@ export default function CheckoutPage() {
     addOrders(newOrders);
     clearCart();
     showToast("Pedido realizado com sucesso! 🎉", "success");
-    setTimeout(() => router.push(`/pedidos/${newOrders[0].id}`), 300);
+    setTimeout(() => push(`/pedidos/${newOrders[0].id}`), 300);
   }
 
   return (
     <AppShell hideNav>
       <div className="pb-40">
-        <PageHeader title="Finalizar pedido" onBack={() => router.push("/carrinho")} />
+        <PageHeader title="Finalizar pedido" onBack={() => push("/carrinho")} />
 
         <div className="flex flex-col gap-4 px-4 pt-3">
           <button
-            onClick={() => router.push("/perfil")}
+            onClick={() => push("/perfil")}
             className="flex items-center gap-3 rounded-2xl bg-white p-4 text-left shadow-sm"
           >
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-forest-900 text-lime-400">
@@ -168,7 +171,7 @@ export default function CheckoutPage() {
                 if (!producer) return null;
                 const subtotal = groupItems.reduce((sum, it) => {
                   const product = products.find((p) => p.id === it.productId);
-                  return sum + (product ? product.pricePerUnit * it.qty : 0);
+                  return sum + cartLineTotal(product, it);
                 }, 0);
                 return (
                   <div key={producerId} className="rounded-2xl bg-white p-3.5 shadow-sm">
@@ -182,7 +185,7 @@ export default function CheckoutPage() {
                         const product = products.find((p) => p.id === it.productId);
                         return (
                           <li key={it.productId}>
-                            {it.qty} {product?.unit} de {product?.name}
+                            {it.qty} {product ? unitLabel(product.unit, it.qty > 1) : ""} de {product?.name}
                           </li>
                         );
                       })}

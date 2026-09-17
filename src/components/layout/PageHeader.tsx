@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
@@ -18,8 +18,8 @@ export function PageHeader({
   tone?: "light" | "dark" | "overlay";
   subtitle?: string;
 }) {
-  const router = useRouter();
-  const goBack = onBack ?? (() => router.back());
+  const { back } = useNavigate();
+  const goBack = onBack ?? (() => back());
 
   if (tone === "overlay") {
     return (

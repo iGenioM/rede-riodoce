@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { ShieldCheck, ArrowRight, Sprout, ShoppingBasket } from "lucide-react";
 import { useSessionStore } from "@/lib/store/useSessionStore";
 import { Button } from "@/components/ui";
 import { BUYER_NAME } from "@/lib/mockData";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const login = useSessionStore((s) => s.login);
   const completeOnboarding = useSessionStore((s) => s.completeOnboarding);
   const setMode = useSessionStore((s) => s.setMode);
@@ -19,14 +19,14 @@ export default function LoginPage() {
     login(name.trim() || BUYER_NAME);
     completeOnboarding();
     setMode(startMode);
-    router.replace(startMode === "produtor" ? "/painel" : "/home");
+    replace(startMode === "produtor" ? "/painel" : "/home");
   }
 
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center bg-cream-100 px-6 py-10">
       <div className="mb-8 flex flex-col items-center gap-2 text-center">
         <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-forest-900 text-3xl">🧺</div>
-        <h1 className="mt-2 text-xl font-extrabold text-ink-900">Entrar no CEASA Digital</h1>
+        <h1 className="mt-2 text-xl font-extrabold text-ink-900">Entrar no Rede RioDoce</h1>
         <p className="text-sm text-ink-500">Protótipo com dados fictícios — não é preciso senha real.</p>
       </div>
 

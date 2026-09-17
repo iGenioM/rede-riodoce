@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Bell, MapPin, Search, SlidersHorizontal } from "lucide-react";
 import { useSessionStore } from "@/lib/store/useSessionStore";
 import { useNotificationsStore } from "@/lib/store/useNotificationsStore";
 
 export function BuyerHomeHeader() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const address = useSessionStore((s) => s.buyerAddress);
   const unread = useNotificationsStore(
     (s) => s.notifications.filter((n) => n.scope === "comprador" && !n.read).length
@@ -39,7 +39,7 @@ export function BuyerHomeHeader() {
       </div>
 
       <button
-        onClick={() => router.push("/busca")}
+        onClick={() => push("/busca")}
         className="mt-4 flex w-full items-center gap-2.5 rounded-2xl bg-white px-4 py-3 text-left shadow-sm"
       >
         <Search size={18} className="shrink-0 text-ink-500" />

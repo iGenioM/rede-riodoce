@@ -1,9 +1,9 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { useState } from "react";
 import type { ButtonHTMLAttributes, HTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { RemotePhoto } from "./RemotePhoto";
 
 export function Button({
   className,
@@ -101,34 +101,26 @@ export function RatingStars({
 export function Avatar({
   seed,
   size = 44,
+  priority = false,
 }: {
   seed: { emoji: string; from: string; to: string; photoUrl?: string };
   size?: number;
+  priority?: boolean;
 }) {
-  const [errored, setErrored] = useState(false);
-  const showPhoto = Boolean(seed.photoUrl) && !errored;
   return (
     <div
-      className="relative flex items-center justify-center overflow-hidden rounded-full shrink-0 ring-2 ring-white shadow-sm"
-      style={{
-        width: size,
-        height: size,
-        backgroundImage: `linear-gradient(135deg, ${seed.from}, ${seed.to})`,
-        fontSize: size * 0.5,
-      }}
+      className="relative shrink-0 overflow-hidden rounded-full ring-2 ring-white shadow-sm"
+      style={{ width: size, height: size, fontSize: size * 0.5 }}
     >
-      {showPhoto ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={seed.photoUrl}
-          alt=""
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
-          onError={() => setErrored(true)}
-        />
-      ) : (
-        seed.emoji
-      )}
+      <RemotePhoto
+        seed={seed}
+        alt=""
+        containerClassName="h-full w-full"
+        emojiClassName="text-[1em]"
+        rounded="rounded-full"
+        priority={priority}
+        sizes={`${size}px`}
+      />
     </div>
   );
 }

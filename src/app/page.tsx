@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { ArrowRight } from "lucide-react";
 import { useSessionStore } from "@/lib/store/useSessionStore";
 import { Button } from "@/components/ui";
 
 export default function SplashPage() {
-  const router = useRouter();
+  const { push, replace } = useNavigate();
   const hasHydrated = useSessionStore((s) => s.hasHydrated);
   const loggedIn = useSessionStore((s) => s.loggedIn);
   const mode = useSessionStore((s) => s.mode);
@@ -15,9 +15,9 @@ export default function SplashPage() {
   useEffect(() => {
     if (!hasHydrated) return;
     if (loggedIn) {
-      router.replace(mode === "produtor" ? "/painel" : "/home");
+      replace(mode === "produtor" ? "/painel" : "/home");
     }
-  }, [hasHydrated, loggedIn, mode, router]);
+  }, [hasHydrated, loggedIn, mode, replace]);
 
   return (
     <main className="relative mx-auto flex min-h-dvh w-full max-w-md flex-col justify-end overflow-hidden bg-forest-900 text-cream-100">
@@ -32,7 +32,7 @@ export default function SplashPage() {
         </div>
         <div className="flex flex-col items-center gap-2 text-center">
           <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold tracking-wide text-lime-400">
-            CEASA DIGITAL
+            Rede RioDoce
           </span>
           <h1 className="text-2xl font-extrabold leading-tight">
             Do assentamento
@@ -57,7 +57,7 @@ export default function SplashPage() {
         <Button
           size="lg"
           className="mt-6 w-full"
-          onClick={() => router.push("/login")}
+          onClick={() => push("/login")}
         >
           Começar
           <ArrowRight size={18} />

@@ -6,13 +6,7 @@ import { ProductImage } from "@/components/ui/ProductImage";
 import { CATEGORIES } from "@/lib/mockData";
 import type { Product, Unit } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-const UNITS: { key: Unit; label: string }[] = [
-  { key: "kg", label: "kg" },
-  { key: "unid", label: "unidade" },
-  { key: "dz", label: "dúzia" },
-  { key: "molho", label: "molho/maço" },
-];
+import { UNIT_OPTIONS, defaultMinQtyForProposal } from "@/lib/units";
 
 const EMOJI_OPTIONS = [
   "🥬", "🥦", "🥕", "🍅", "🫑", "🥒", "🌽", "🥔", "🍠", "🧅",
@@ -44,7 +38,7 @@ export function ProductForm({
   const [categoryId, setCategoryId] = useState(initial?.categoryId ?? CATEGORIES[0].id);
   const [description, setDescription] = useState(initial?.description ?? "");
   const [pricePerUnit, setPricePerUnit] = useState(initial?.pricePerUnit?.toString() ?? "");
-  const [unit, setUnit] = useState<Unit>(initial?.unit ?? "kg");
+  const [unit, setUnit] = useState<Unit>(initial?.unit ?? "cx");
   const [availableQty, setAvailableQty] = useState(initial?.availableQty?.toString() ?? "");
   const [organic, setOrganic] = useState(initial?.organic ?? false);
   const [emoji, setEmoji] = useState(initial?.imageSeed.emoji ?? "🥬");
@@ -150,9 +144,9 @@ export function ProductForm({
             onChange={(e) => setUnit(e.target.value as Unit)}
             className="w-full rounded-xl border border-ink-900/10 bg-white px-4 py-3 text-sm text-ink-900 outline-none focus:border-forest-700"
           >
-            {UNITS.map((u) => (
+            {UNIT_OPTIONS.map((u) => (
               <option key={u.key} value={u.key}>
-                {u.label}
+                {u.label} — {u.hint}
               </option>
             ))}
           </select>

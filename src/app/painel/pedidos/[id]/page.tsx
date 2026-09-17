@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { MessageCircle, MapPin, Check, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -17,7 +17,7 @@ import { formatBRL, formatDateFull, formatQty } from "@/lib/utils";
 
 export default function PedidoPainelDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const order = useOrdersStore((s) => s.orders.find((o) => o.id === id));
   const updateStatus = useOrdersStore((s) => s.updateStatus);
   const setDeliveryEstimate = useOrdersStore((s) => s.setDeliveryEstimate);
@@ -79,12 +79,12 @@ export default function PedidoPainelDetalhePage({ params }: { params: Promise<{ 
 
   function openChat() {
     const convId = getOrCreateConversation(order!.producerId);
-    router.push(`/chat/${convId}`);
+    push(`/chat/${convId}`);
   }
 
   return (
     <AppShell>
-      <PageHeader title={`Pedido #${order.id.slice(-5)}`} subtitle={formatDateFull(order.createdAt)} onBack={() => router.back()} />
+      <PageHeader title={`Pedido #${order.id.slice(-5)}`} subtitle={formatDateFull(order.createdAt)} onBack={() => back()} />
 
       <div className="flex flex-col gap-4 px-4 pt-4">
         <div className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-sm">

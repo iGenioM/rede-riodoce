@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { MessageCircle, Phone, MapPin, Star, Check } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 
 export default function PedidoDetalhePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
 
   const order = useOrdersStore((s) => s.orders.find((o) => o.id === id));
   const markReviewed = useOrdersStore((s) => s.markReviewed);
@@ -66,12 +66,12 @@ export default function PedidoDetalhePage({ params }: { params: Promise<{ id: st
 
   function openChat() {
     const convId = getOrCreateConversation(producer!.id);
-    router.push(`/chat/${convId}`);
+    push(`/chat/${convId}`);
   }
 
   return (
     <AppShell>
-      <PageHeader title={`Pedido #${order.id.slice(-5)}`} subtitle={formatDateFull(order.createdAt)} onBack={() => router.back()} />
+      <PageHeader title={`Pedido #${order.id.slice(-5)}`} subtitle={formatDateFull(order.createdAt)} onBack={() => back()} />
 
       <div className="flex flex-col gap-4 px-4 pt-4">
         <div className="rounded-2xl bg-white p-4 shadow-sm">
@@ -117,7 +117,7 @@ export default function PedidoDetalhePage({ params }: { params: Promise<{ id: st
         </div>
 
         <button
-          onClick={() => router.push(`/produtores/${producer.id}`)}
+          onClick={() => push(`/produtores/${producer.id}`)}
           className="flex items-center gap-3 rounded-2xl bg-white p-3.5 text-left shadow-sm"
         >
           <Avatar seed={producer.avatarSeed} size={44} />

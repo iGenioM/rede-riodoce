@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import Link from "next/link";
 import { MapPin, BadgeCheck, Plus, ArrowUpDown } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -18,6 +18,7 @@ import { distanceKm, formatDistance } from "@/lib/geo";
 import { CATEGORIES } from "@/lib/mockData";
 import { getProductTypeSummary } from "@/lib/offers";
 import { cn } from "@/lib/utils";
+import { unitLabel } from "@/lib/units";
 
 type SortKey = "preco" | "distancia";
 
@@ -26,7 +27,7 @@ type SortKey = "preco" | "distancia";
  * comparar preço, distância e reputação antes de escolher. */
 export default function ProdutoTipoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const [sort, setSort] = useState<SortKey>("preco");
 
   const products = useProductsStore((s) => s.products);
@@ -55,7 +56,7 @@ export default function ProdutoTipoPage({ params }: { params: Promise<{ id: stri
   if (!summary || offersWithMeta.length === 0) {
     return (
       <AppShell hideNav>
-        <PageHeader title="Produto" onBack={() => router.back()} />
+        <PageHeader title="Produto" onBack={() => back()} />
         <EmptyState title="Nenhuma oferta encontrada" description="Esse produto não está mais disponível." />
       </AppShell>
     );
@@ -74,8 +75,15 @@ export default function ProdutoTipoPage({ params }: { params: Promise<{ id: stri
     <AppShell hideNav>
       <div className="pb-8">
         <div className="relative">
-          <ProductImage seed={summary.imageSeed} className="h-56 w-full" rounded="rounded-none" emojiClassName="text-8xl" />
-          <PageHeader title="" tone="overlay" onBack={() => router.back()} />
+          <ProductImage
+            seed={summary.imageSeed}
+            className="h-56 w-full"
+            rounded="rounded-none"
+            emojiClassName="text-8xl"
+            priority
+            sizes="(max-width: 448px) 100vw, 448px"
+          />
+          <PageHeader title="" tone="overlay" onBack={() => back()} />
           {summary.organicAny && (
             <span className="absolute right-3 top-[calc(env(safe-area-inset-top)+12px)] z-10 rounded-full bg-white px-3 py-1 text-xs font-bold text-forest-700 shadow">
               🌱 Tem opção orgânica
@@ -95,7 +103,7 @@ export default function ProdutoTipoPage({ params }: { params: Promise<{ id: stri
                 {formatBRL(summary.minPrice)}
               </>
             )}
-            <span className="text-sm font-semibold text-ink-500"> /{summary.unit}</span>
+            <span className="text-sm font-semibold text-ink-500"> /{unitLabel(summary.unit)}</span>
           </p>
 
           <div className="mt-4 flex items-center justify-between">
@@ -145,7 +153,7 @@ export default function ProdutoTipoPage({ params }: { params: Promise<{ id: stri
                 <div className="flex shrink-0 flex-col items-end gap-1.5">
                   <p className="text-sm font-extrabold text-forest-800">
                     {formatBRL(offer.pricePerUnit)}
-                    <span className="text-[10px] font-medium text-ink-500">/{offer.unit}</span>
+                    <span className="text-[10px] font-medium text-ink-500">/{unitLabel(offer.unit)}</span>
                   </p>
                   <button
                     onClick={(e) => quickAdd(e, offer.id, offer.producerId, offer.name)}

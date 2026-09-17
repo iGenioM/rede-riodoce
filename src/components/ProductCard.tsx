@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { LinkPendingHighlight } from "@/components/ui/LinkPendingHighlight";
 import { Plus } from "lucide-react";
 import type { ProductTypeSummary } from "@/lib/offers";
 import { ProductImage } from "@/components/ui/ProductImage";
 import { formatBRL } from "@/lib/utils";
+import { unitLabel } from "@/lib/units";
 import { useCartStore } from "@/lib/store/useCartStore";
 import { useToastStore } from "@/lib/store/useToastStore";
 
@@ -29,10 +31,17 @@ export function ProductCard({ summary, compact = false }: { summary: ProductType
   return (
     <Link
       href={href}
-      className="group flex w-[152px] shrink-0 flex-col gap-2 rounded-2xl bg-white p-2 shadow-[0_1px_3px_rgba(18,32,26,0.08)] active:scale-[0.98] transition-transform"
+      prefetch
+      className="group relative flex w-[152px] shrink-0 flex-col gap-2 rounded-2xl bg-white p-2 shadow-[0_1px_3px_rgba(18,32,26,0.08)] active:scale-[0.98] transition-transform"
     >
+      <LinkPendingHighlight className="rounded-2xl" />
       <div className="relative">
-        <ProductImage seed={summary.imageSeed} className="h-28 w-full" emojiClassName="text-5xl" />
+        <ProductImage
+          seed={summary.imageSeed}
+          className="h-28 w-full"
+          emojiClassName="text-5xl"
+          sizes="152px"
+        />
         {summary.organicAny && (
           <span className="absolute left-1.5 top-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold text-forest-700">
             Orgânico
@@ -62,7 +71,7 @@ export function ProductCard({ summary, compact = false }: { summary: ProductType
         <p className="mt-0.5 text-sm font-bold text-forest-800">
           {summary.offerCount > 1 && <span className="text-[11px] font-medium text-ink-500">a partir de </span>}
           {formatBRL(summary.minPrice)}
-          <span className="text-[11px] font-medium text-ink-500">/{summary.unit}</span>
+          <span className="text-[11px] font-medium text-ink-500">/{unitLabel(summary.unit)}</span>
         </p>
       </div>
     </Link>

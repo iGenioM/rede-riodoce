@@ -1,12 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import {
   MapPin,
   MessageCircle,
   Bell,
   ShoppingBasket,
+  HandCoins,
   LogOut,
   ChevronRight,
   Star,
@@ -19,10 +20,11 @@ import { BottomSheet } from "@/components/ui/Sheet";
 import { useSessionStore } from "@/lib/store/useSessionStore";
 import { useProducersStore } from "@/lib/store/useProducersStore";
 import { useChatStore } from "@/lib/store/useChatStore";
+import { useProposalsStore } from "@/lib/store/useProposalsStore";
 import { useToastStore } from "@/lib/store/useToastStore";
 
 export default function PainelPerfilPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producerId = useSessionStore((s) => s.producerId);
   const setMode = useSessionStore((s) => s.setMode);
   const logout = useSessionStore((s) => s.logout);
@@ -34,6 +36,14 @@ export default function PainelPerfilPage() {
     [allConversations, producerId]
   );
   const showToast = useToastStore((s) => s.show);
+  const allProposals = useProposalsStore((s) => s.proposals);
+  const pendingProposals = useMemo(
+    () =>
+      allProposals.filter(
+        (p) => p.producerId === producerId && p.status === "pendente"
+      ).length,
+    [allProposals, producerId]
+  );
 
   const [editOpen, setEditOpen] = useState(false);
   const [farmName, setFarmName] = useState(producer?.farmName ?? "");
@@ -52,7 +62,7 @@ export default function PainelPerfilPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Perfil do produtor" onBack={() => router.push("/painel")} />
+      <PageHeader title="Perfil do produtor" onBack={() => push("/painel")} />
 
       <div className="flex flex-col gap-5 px-4 pt-4">
         <div className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
@@ -69,26 +79,34 @@ export default function PainelPerfilPage() {
         </Button>
 
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-          <ProfileLink icon={MapPin} label="Área de atuação" sublabel={`${producer.radiusKm} km de raio`} onClick={() => router.push("/painel/area-atuacao")} />
+          <ProfileLink icon={MapPin} label="Área de atuação" sublabel={`${producer.radiusKm} km de raio`} onClick={() => push("/painel/area-atuacao")} />
           <Divider />
-          <ProfileLink icon={Package} label="Meus produtos" onClick={() => router.push("/painel/produtos")} />
+          <ProfileLink icon={Package} label="Meus produtos" onClick={() => push("/painel/produtos")} />
           <Divider />
-          <ProfileLink icon={Star} label="Avaliações" onClick={() => router.push("/painel/avaliacoes")} />
+          <ProfileLink
+            icon={HandCoins}
+            label="Propostas de preço"
+            sublabel={pendingProposals > 0 ? `${pendingProposals} aguardando resposta` : "Negociações de atacado"}
+            badge={pendingProposals > 0 ? pendingProposals : undefined}
+            onClick={() => push("/painel/propostas")}
+          />
+          <Divider />
+          <ProfileLink icon={Star} label="Avaliações" onClick={() => push("/painel/avaliacoes")} />
           <Divider />
           <ProfileLink
             icon={MessageCircle}
             label="Mensagens"
             badge={unread > 0 ? unread : undefined}
-            onClick={() => router.push("/chat")}
+            onClick={() => push("/chat")}
           />
           <Divider />
-          <ProfileLink icon={Bell} label="Notificações" onClick={() => router.push("/notificacoes")} />
+          <ProfileLink icon={Bell} label="Notificações" onClick={() => push("/notificacoes")} />
         </div>
 
         <button
           onClick={() => {
             setMode("comprador");
-            router.push("/home");
+            push("/home");
           }}
           className="flex items-center gap-3 rounded-2xl bg-forest-900 p-4 text-left text-cream-100 shadow-sm"
         >
@@ -107,7 +125,7 @@ export default function PainelPerfilPage() {
           className="justify-start text-tomato"
           onClick={() => {
             logout();
-            router.replace("/login");
+            replace("/login");
           }}
         >
           <LogOut size={16} /> Sair

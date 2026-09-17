@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Send, Phone } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 
 export default function ChatThreadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const mode = useSessionStore((s) => s.mode);
   const conversation = useChatStore((s) => s.conversations.find((c) => c.id === id));
   const allMessages = useChatStore((s) => s.messages);
@@ -63,7 +63,7 @@ export default function ChatThreadPage({ params }: { params: Promise<{ id: strin
         <PageHeader
           title={title}
           tone="dark"
-          onBack={() => router.push("/chat")}
+          onBack={() => push("/chat")}
           right={
             mode === "comprador" ? (
               <button

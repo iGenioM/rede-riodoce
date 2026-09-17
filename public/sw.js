@@ -1,5 +1,5 @@
-// CEASA Digital — Service Worker (offline-first, cache-first para assets, network-first para navegação)
-const VERSION = "ceasa-digital-v3";
+// Rede RioDoce — Service Worker (offline-first, cache-first para assets, network-first para navegação)
+const VERSION = "rede-riodoce-v2";
 const APP_SHELL = ["/home", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 // Host das fotos profissionais (produtos e pessoas) geradas via IA. Fazemos

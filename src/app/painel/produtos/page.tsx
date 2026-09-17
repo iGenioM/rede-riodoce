@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { Plus, Pencil, Trash2, Package, EyeOff, Eye } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -13,9 +13,10 @@ import { useProductsStore } from "@/lib/store/useProductsStore";
 import { useToastStore } from "@/lib/store/useToastStore";
 import { CATEGORIES } from "@/lib/mockData";
 import { formatBRL } from "@/lib/utils";
+import { unitLabel } from "@/lib/units";
 
 export default function ProdutosPainelPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const producerId = useSessionStore((s) => s.producerId);
   const allProducts = useProductsStore((s) => s.products);
   const products = useMemo(
@@ -34,9 +35,9 @@ export default function ProdutosPainelPage() {
     <AppShell>
       <PageHeader
         title="Meus produtos"
-        onBack={() => router.push("/painel")}
+        onBack={() => push("/painel")}
         right={
-          <Button size="sm" onClick={() => router.push("/painel/produtos/novo")}>
+          <Button size="sm" onClick={() => push("/painel/produtos/novo")}>
             <Plus size={14} /> Novo
           </Button>
         }
@@ -49,7 +50,7 @@ export default function ProdutosPainelPage() {
             title="Nenhum produto cadastrado"
             description="Adicione seu primeiro produto para começar a vender."
             action={
-              <Button onClick={() => router.push("/painel/produtos/novo")}>
+              <Button onClick={() => push("/painel/produtos/novo")}>
                 <Plus size={15} /> Adicionar produto
               </Button>
             }
@@ -68,16 +69,16 @@ export default function ProdutosPainelPage() {
                   <p className="text-xs text-ink-500">{category?.name}</p>
                   <div className="mt-1 flex items-center gap-2">
                     <span className="text-sm font-bold text-forest-800">
-                      {formatBRL(product.pricePerUnit)}/{product.unit}
+                      {formatBRL(product.pricePerUnit)}/{unitLabel(product.unit)}
                     </span>
                     <Badge variant={product.availableQty > 0 ? "outline" : "tomato"}>
-                      {product.availableQty} {product.unit} em estoque
+                      {product.availableQty} {unitLabel(product.unit, product.availableQty > 1)} em estoque
                     </Badge>
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col gap-1.5">
                   <button
-                    onClick={() => router.push(`/painel/produtos/${product.id}/editar`)}
+                    onClick={() => push(`/painel/produtos/${product.id}/editar`)}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-cream-200 text-ink-700"
                     aria-label="Editar"
                   >

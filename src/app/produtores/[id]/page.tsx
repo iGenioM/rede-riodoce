@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import { BadgeCheck, MessageCircle, Phone, Truck, MapPin, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -18,7 +18,7 @@ import { cn, timeAgo } from "@/lib/utils";
 
 export default function ProdutorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const [tab, setTab] = useState<"produtos" | "avaliacoes">("produtos");
 
   const producer = useProducersStore((s) => s.producers.find((p) => p.id === id));
@@ -49,14 +49,21 @@ export default function ProdutorPage({ params }: { params: Promise<{ id: string 
 
   function openChat() {
     const convId = getOrCreateConversation(producer!.id);
-    router.push(`/chat/${convId}`);
+    push(`/chat/${convId}`);
   }
 
   return (
     <AppShell>
       <div className="relative">
-        <ProductImage seed={producer.coverSeed} className="h-40 w-full" rounded="rounded-none" emojiClassName="text-7xl" />
-        <PageHeader title="" tone="overlay" onBack={() => router.back()} />
+        <ProductImage
+          seed={producer.coverSeed}
+          className="h-40 w-full"
+          rounded="rounded-none"
+          emojiClassName="text-7xl"
+          priority
+          sizes="(max-width: 448px) 100vw, 448px"
+        />
+        <PageHeader title="" tone="overlay" onBack={() => back()} />
       </div>
 
       <div className="relative -mt-8 rounded-t-3xl bg-cream-100 px-4 pt-5">

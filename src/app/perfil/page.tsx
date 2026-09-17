@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "@/hooks/useNavigate";
 import {
   MapPin,
   ClipboardList,
@@ -24,7 +24,7 @@ import { useToastStore } from "@/lib/store/useToastStore";
 import { cn } from "@/lib/utils";
 
 export default function PerfilPage() {
-  const router = useRouter();
+  const { push, replace, back } = useNavigate();
   const buyerName = useSessionStore((s) => s.buyerName);
   const buyerCnpj = useSessionStore((s) => s.buyerCnpj);
   const buyerContactName = useSessionStore((s) => s.buyerContactName);
@@ -57,7 +57,7 @@ export default function PerfilPage() {
 
   return (
     <AppShell>
-      <PageHeader title="Perfil" onBack={() => router.push("/home")} />
+      <PageHeader title="Perfil" onBack={() => push("/home")} />
 
       <div className="flex flex-col gap-5 px-4 pt-4">
         <div className="flex items-center gap-3 rounded-2xl bg-white p-4 shadow-sm">
@@ -86,22 +86,22 @@ export default function PerfilPage() {
         </button>
 
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
-          <ProfileLink icon={ClipboardList} label="Meus pedidos" onClick={() => router.push("/pedidos")} />
+          <ProfileLink icon={ClipboardList} label="Meus pedidos" onClick={() => push("/pedidos")} />
           <Divider />
           <ProfileLink
             icon={MessageCircle}
             label="Mensagens"
             badge={unreadChats > 0 ? unreadChats : undefined}
-            onClick={() => router.push("/chat")}
+            onClick={() => push("/chat")}
           />
           <Divider />
-          <ProfileLink icon={Bell} label="Notificações" onClick={() => router.push("/notificacoes")} />
+          <ProfileLink icon={Bell} label="Notificações" onClick={() => push("/notificacoes")} />
         </div>
 
         <button
           onClick={() => {
             setMode("produtor");
-            router.push("/painel");
+            push("/painel");
           }}
           className="flex items-center gap-3 rounded-2xl bg-forest-900 p-4 text-left text-cream-100 shadow-sm"
         >
@@ -130,7 +130,7 @@ export default function PerfilPage() {
           className="justify-start text-tomato"
           onClick={() => {
             logout();
-            router.replace("/login");
+            replace("/login");
           }}
         >
           <LogOut size={16} /> Sair

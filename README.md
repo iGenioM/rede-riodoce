@@ -1,4 +1,4 @@
-# CEASA Digital — Protótipo de Marketplace Agrícola
+# Rede RioDoce — Protótipo de Marketplace Agrícola
 
 Protótipo funcional (Next.js 16 + React 19 + TypeScript + Tailwind v4) de um marketplace estilo "CEASA online" que conecta produtores de assentamentos rurais a compradores da região. 100% front-end, com dados mockados e persistência local — **sem backend real**, conforme escopo do MVP.
 
