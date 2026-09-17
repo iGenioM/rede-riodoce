@@ -33,15 +33,30 @@ const PRODUCER_TABS = [
   { href: "/painel/perfil", label: "Perfil", icon: UserRound },
 ];
 
+/** Evita marcar “Painel” ativo em /painel/produtos etc. — só a aba mais específica. */
+function isTabActive(pathname: string, href: string, allHrefs: string[]): boolean {
+  if (pathname === href) return true;
+  if (!pathname.startsWith(`${href}/`)) return false;
+
+  const hasMoreSpecificTab = allHrefs.some(
+    (other) =>
+      other !== href &&
+      other.startsWith(`${href}/`) &&
+      (pathname === other || pathname.startsWith(`${other}/`))
+  );
+  return !hasMoreSpecificTab;
+}
+
 export function BottomNav() {
   const pathname = usePathname();
   const mode = useSessionStore((s) => s.mode);
   const tabs = mode === "produtor" ? PRODUCER_TABS : BUYER_TABS;
+  const hrefs = tabs.map((t) => t.href);
 
   return (
-    <nav className="safe-bottom fixed inset-x-0 bottom-0 z-40 mx-auto flex w-full max-w-md items-stretch justify-between border-t border-ink-900/8 bg-white/95 px-2 backdrop-blur">
+    <nav className="flex w-full items-stretch justify-between">
       {tabs.map((tab) => {
-        const active = pathname === tab.href || pathname.startsWith(tab.href + "/");
+        const active = isTabActive(pathname, tab.href, hrefs);
         const Icon = tab.icon;
         return (
           <Link

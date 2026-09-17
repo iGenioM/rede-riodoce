@@ -10,7 +10,7 @@ import { formatBRL } from "@/lib/utils";
 
 export function CartBar() {
   const pathname = usePathname();
-  const { push, replace, back } = useNavigate();
+  const { push } = useNavigate();
   const mode = useSessionStore((s) => s.mode);
   const items = useCartStore((s) => s.items);
 
@@ -25,8 +25,9 @@ export function CartBar() {
   }, 0);
 
   return (
-    <div className="fixed inset-x-0 bottom-[68px] z-30 mx-auto w-full max-w-md px-4">
+    <div className="w-full px-1">
       <button
+        type="button"
         onClick={() => push("/carrinho")}
         className="flex w-full items-center justify-between rounded-2xl bg-forest-900 px-4 py-3.5 text-cream-100 shadow-lg active:scale-[0.98] transition-transform"
       >
